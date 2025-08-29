@@ -131,20 +131,23 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  const filteredUsers = userSummaries.filter(
-    (user) =>
-      user.user_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.latest_mood.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.constellation.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredUsers = userSummaries.filter((user) => {
+    const term = (searchTerm || "").toLowerCase();
+    const id = (user.user_id || "").toLowerCase();
+    const mood = (user.latest_mood || "").toLowerCase();
+    const constel = (user.constellation || "").toLowerCase();
+    return id.includes(term) || mood.includes(term) || constel.includes(term);
+  });
 
   const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    dateString
+      ? new Date(dateString).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
 
   if (loading) {
     return (
