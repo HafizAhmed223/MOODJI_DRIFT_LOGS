@@ -2,9 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
+  allowedDevOrigins: ["*.fly.dev"],
 };
 
 export default nextConfig;
