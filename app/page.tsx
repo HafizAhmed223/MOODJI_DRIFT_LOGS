@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, Users, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { processUserSummaries } from "@/lib/drift-data";
 
 interface DriftLogEntry {
   id: string;
@@ -82,48 +83,76 @@ export default function Dashboard() {
   const [userSummaries, setUserSummaries] = useState<UserSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log || [];
-        const userMap: { [key: string]: DriftLogEntry[] } = {};
-        logs.forEach((log) => {
-          if (!userMap[log.user_id]) userMap[log.user_id] = [];
-          userMap[log.user_id].push(log);
-        });
-        const summaries: UserSummary[] = Object.entries(userMap).map(
-          ([userId, entries]) => {
-            const sortedEntries = entries.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            );
-            const latestEntry = sortedEntries[0];
-            const completedEntries = entries.filter(
-              (e) => e.final_payload,
-            ).length;
-            const journeyCompletion = (completedEntries / entries.length) * 100;
-            return {
-              user_id: userId,
-              latest_entry: latestEntry,
-              total_entries: entries.length,
-              journey_completion: journeyCompletion,
-              latest_mood: latestEntry.creation.mood_label,
-              last_activity: latestEntry.created_at,
-              constellation: latestEntry.celestium_mapping.constellation,
-              status: latestEntry.law_portion.status,
-            };
-          },
-        );
+        let response: Response;
+        try {
+          response = await fetch(`/api/users?page=1&limit=100`, {
+            cache: "no-store",
+          });
+        } catch (e) {
+          await new Promise((r) => setTimeout(r, 500));
+          response = await fetch(`/api/users?page=1&limit=100`, {
+            cache: "no-store",
+          });
+        }
+        let summaries: UserSummary[] = [];
+        if (response.ok) {
+          const data = await response.json();
+          summaries = (data.users || []).map((u: any) => ({
+            user_id: u.userId,
+            latest_entry: {
+              id: "",
+              user_id: u.userId,
+              created_at: u.last_activity,
+              final_payload: false,
+              creation: {
+                input_desire: "",
+                mood_label: u.latest_mood,
+                conflict_intensity: 0,
+                field: { name: "", hz: 0 },
+                bloom_phase: 0,
+                bloom_petal: "",
+                equation: { formula: "", description: "" },
+              },
+              law_portion: {
+                status: u.status,
+                rules_applied: [],
+                contract_scan: "",
+              },
+              bloom_render: { petal: "", animation: "" },
+              celestium_mapping: { constellation: u.constellation },
+              mirror_dna: { dna_string: "" },
+            },
+            total_entries: u.total_entries || 0,
+            journey_completion: u.journey_completion || 0,
+            latest_mood: u.latest_mood,
+            last_activity: u.last_activity,
+            constellation: u.constellation,
+            status: u.status,
+          }));
+        }
+        if (!response.ok || summaries.length === 0) {
+          const fallbackRes = await fetch("/mock_data.json", {
+            cache: "no-store",
+          });
+          if (fallbackRes.ok) {
+            const data = await fallbackRes.json();
+            const logs = data?.resonance_drift_log || [];
+            summaries = processUserSummaries(
+              logs as any,
+            ) as unknown as UserSummary[];
+          }
+        }
         setUserSummaries(summaries);
-      } catch (e) {
+        setError(null);
+      } catch (e: any) {
         console.error("Error loading drift log data:", e);
+        setError(e?.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -131,20 +160,23 @@ export default function Dashboard() {
     loadData();
   }, []);
 
-  const filteredUsers = userSummaries.filter(
-    (user) =>
-      user.user_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.latest_mood.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.constellation.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredUsers = userSummaries.filter((user) => {
+    const term = (searchTerm || "").toLowerCase();
+    const id = (user.user_id || "").toLowerCase();
+    const mood = (user.latest_mood || "").toLowerCase();
+    const constel = (user.constellation || "").toLowerCase();
+    return id.includes(term) || mood.includes(term) || constel.includes(term);
+  });
 
   const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    dateString
+      ? new Date(dateString).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
 
   if (loading) {
     return (
@@ -152,6 +184,17 @@ export default function Dashboard() {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-celestial-aurora border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-foreground/70">Loading Resonance Drift Logs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen celestial-gradient flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-destructive border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-destructive-foreground/90">{error}</p>
         </div>
       </div>
     );
@@ -211,13 +254,17 @@ export default function Dashboard() {
                 <Card
                   key={user.user_id}
                   className="drift-card cursor-pointer group relative overflow-hidden"
-                  onClick={() => router.push(`/user/${user.user_id}`)}
+                  onClick={() => {
+                    if (!user.user_id) return;
+                    router.push(`/user/${encodeURIComponent(user.user_id)}`);
+                  }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-celestial-aurora/5 to-celestial-plasma/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <CardHeader className="relative z-10 space-y-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg font-semibold text-foreground group-hover:text-celestial-aurora transition-colors">
-                        {user.user_id.replace("user_", "User ")}
+                        {(user.user_id ?? "").replace("user_", "User ") ||
+                          "User"}
                       </CardTitle>
                       {getStatusIcon(user.status)}
                     </div>

@@ -50,12 +50,18 @@ import {
   processFrequencyData,
   getEmptyStateMessage,
 } from "@/lib/chart-utils";
+import { loadDriftLogData, getUserEntries } from "@/lib/drift-data";
 
-export default function UserProfile({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default function UserProfile({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = React.use(params as Promise<{ id: string }>);
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<DriftLogEntry | null>(
     null,
   );
@@ -63,20 +69,42 @@ export default function UserProfile({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
-        const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log;
-        const entries = logs
-          .filter((log: DriftLogEntry) => log.user_id === id)
-          .sort(
-            (a: DriftLogEntry, b: DriftLogEntry) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
+        let response: Response;
+        try {
+          response = await fetch(`/api/users/${id}/drift-logs`, {
+            cache: "no-store",
+          });
+        } catch (e) {
+          await new Promise((r) => setTimeout(r, 500));
+          response = await fetch(`/api/users/${id}/drift-logs`, {
+            cache: "no-store",
+          });
+        }
+        let entries: DriftLogEntry[] = [];
+        if (response.ok) {
+          const data = await response.json();
+          entries = (data.logs || []).map((log: any) => ({
+            id: log.id,
+            user_id: log.userId ?? log.user_id,
+            created_at: log.created_at,
+            final_payload: log.final_payload,
+            creation: log.creation,
+            law_portion: log.law_portion,
+            bloom_render: log.bloom_render,
+            celestium_mapping: log.celestium_mapping,
+            mirror_dna: log.mirror_dna,
+          }));
+        }
+        if (!response.ok || entries.length === 0) {
+          const allLogs = await loadDriftLogData();
+          entries = getUserEntries(allLogs, id);
+        }
         setUserEntries(entries);
         if (entries.length > 0) setSelectedEntry(entries[entries.length - 1]);
-      } catch (error) {
+        setError(null);
+      } catch (error: any) {
         console.error("Error loading user data:", error);
+        setError(error?.message || "Failed to load user data");
       } finally {
         setLoading(false);
       }
@@ -100,6 +128,28 @@ export default function UserProfile({ params }: { params: { id: string } }) {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-celestial-aurora border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-foreground/70">Loading User Starmap...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen celestial-gradient flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-20 h-20 rounded-full bg-destructive/20 flex items-center justify-center mx-auto">
+            <span className="text-destructive">!</span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">
+              Unable to load user
+            </h2>
+            <p className="text-muted-foreground">{error}</p>
+          </div>
+          <Button onClick={() => router.push("/")} className="mt-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Return to Dashboard
+          </Button>
         </div>
       </div>
     );
