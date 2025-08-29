@@ -90,11 +90,11 @@ Path aliases:
 ## Development Commands
 
 ```bash
-pnpm dev        # Start dev server (client + server)
-pnpm build      # Production build
-pnpm start      # Start production server
-pnpm typecheck  # TypeScript validation
-pnpm test          # Run Vitest tests
+npm run dev        # Start dev server
+npm run build      # Production build
+npm run start      # Start production server
+npm run typecheck  # TypeScript validation
+npm run test       # Run Vitest tests
 ```
 
 ## Adding Features
