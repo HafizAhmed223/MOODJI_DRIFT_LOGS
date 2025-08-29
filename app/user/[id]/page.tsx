@@ -64,7 +64,13 @@ export default function UserProfile({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        let response: Response;
+        try {
+          response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        } catch (e) {
+          await new Promise((r) => setTimeout(r, 500));
+          response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        }
         if (response.status === 404) {
           setUserEntries([]);
           setSelectedEntry(null);
