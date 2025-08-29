@@ -231,7 +231,10 @@ export default function Dashboard() {
                 <Card
                   key={user.user_id}
                   className="drift-card cursor-pointer group relative overflow-hidden"
-                  onClick={() => router.push(`/user/${user.user_id}`)}
+                  onClick={() => {
+                    if (!user.user_id) return;
+                    router.push(`/user/${encodeURIComponent(user.user_id)}`);
+                  }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-celestial-aurora/5 to-celestial-plasma/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <CardHeader className="relative z-10 space-y-4">
