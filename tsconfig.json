@@ -43,9 +43,11 @@
   },
   "include": [
     "app/**/*",
-    "client/**/*",
-    "next-env.d.ts",
+    "client/components/**/*",
+    "client/lib/**/*",
+    "client/hooks/**/*",
     "shared/**/*",
+    "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
