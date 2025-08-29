@@ -52,7 +52,7 @@ import {
 } from "@/lib/chart-utils";
 
 export default function UserProfile({ params }: { params: Promise<{ id: string }> }) {
-  const id = params.id;
+  const { id } = use(params);
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
