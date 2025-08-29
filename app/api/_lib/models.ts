@@ -65,8 +65,9 @@ const MirrorDnaSchema = new Schema(
 const DriftLogSchema = new Schema(
   {
     id: { type: String, required: true, index: true },
-    userId: { type: String, required: true, index: true },
-    created_at: { type: Date, required: true, index: true },
+    userId: { type: String, required: false, index: true, alias: "user_id" },
+    user_id: { type: String, required: false, index: true },
+    created_at: { type: Schema.Types.Mixed, required: true, index: true },
     final_payload: { type: Boolean, required: true },
     creation: { type: CreationSchema, required: true },
     law_portion: { type: LawPortionSchema, required: true },
@@ -77,6 +78,7 @@ const DriftLogSchema = new Schema(
   {
     versionKey: false,
     collection: getCollectionName(),
+    strict: false,
   },
 );
 
