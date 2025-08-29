@@ -7,10 +7,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: { userId: string } },
 ) {
   try {
-    const { userId } = await params;
+    const { userId } = params;
     await connectToDatabase();
 
     const docs = await DriftLogModel.find({ userId })
