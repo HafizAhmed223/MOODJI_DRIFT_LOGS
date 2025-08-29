@@ -44,5 +44,5 @@ export async function connectToDatabase() {
 }
 
 export function getCollectionName() {
-  return process.env.MONGODB_COLLECTION || "resonance_drift_log";
+  return process.env.MONGODB_COLLECTION || "resonannce_drift_log";
 }
