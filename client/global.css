@@ -1,0 +1,213 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    /* Celestial Dark Theme - Deep Space Colors */
+    --background: 223 47% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 224 47% 6%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 224 47% 6%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 223 47% 4%;
+
+    --secondary: 240 21% 15%;
+    --secondary-foreground: 210 40% 95%;
+
+    --muted: 240 21% 12%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 270 95% 75%;
+    --accent-foreground: 223 47% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 21% 15%;
+    --input: 240 21% 12%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Celestial Theme Colors */
+    --celestial-void: 223 47% 4%;
+    --celestial-cosmos: 240 21% 8%;
+    --celestial-nebula: 270 95% 20%;
+    --celestial-star: 60 100% 85%;
+    --celestial-aurora: 217 91% 60%;
+    --celestial-plasma: 300 100% 75%;
+    --celestial-quantum: 180 100% 70%;
+
+    /* Drift Log Petal Colors */
+    --drift-azure: 217 91% 60%;
+    --drift-crimson: 0 84% 60%;
+    --drift-golden: 45 100% 70%;
+    --drift-violet: 270 95% 75%;
+    --drift-amber: 35 100% 65%;
+    --drift-emerald: 160 84% 60%;
+    --drift-pearl: 210 20% 85%;
+    --drift-cosmic: 300 100% 75%;
+
+    --sidebar-background: 224 47% 6%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 223 47% 4%;
+    --sidebar-accent: 240 21% 12%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 240 21% 15%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  .light {
+    /* Light mode fallback - Ethereal Light Theme */
+    --background: 210 40% 98%;
+    --foreground: 223 47% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 223 47% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 47% 4%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 223 47% 4%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 270 95% 75%;
+    --accent-foreground: 223 47% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    /* Celestial colors remain the same for consistency */
+    --celestial-void: 223 47% 95%;
+    --celestial-cosmos: 240 21% 92%;
+    --celestial-nebula: 270 95% 85%;
+    --celestial-star: 45 100% 50%;
+    --celestial-aurora: 217 91% 45%;
+    --celestial-plasma: 300 100% 60%;
+    --celestial-quantum: 180 100% 45%;
+
+    --drift-azure: 217 91% 45%;
+    --drift-crimson: 0 84% 50%;
+    --drift-golden: 45 100% 50%;
+    --drift-violet: 270 95% 60%;
+    --drift-amber: 35 100% 50%;
+    --drift-emerald: 160 84% 45%;
+    --drift-pearl: 210 20% 60%;
+    --drift-cosmic: 300 100% 60%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Celestial themed elements */
+  .celestial-gradient {
+    background: linear-gradient(135deg,
+      hsl(var(--celestial-void)) 0%,
+      hsl(var(--celestial-cosmos)) 50%,
+      hsl(var(--celestial-nebula)) 100%);
+  }
+
+  .aurora-glow {
+    box-shadow: 0 0 20px hsl(var(--celestial-aurora)),
+                0 0 40px hsl(var(--celestial-aurora)),
+                0 0 60px hsl(var(--celestial-aurora));
+  }
+
+  .star-field::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, hsl(var(--celestial-star)), transparent),
+      radial-gradient(2px 2px at 40px 70px, hsl(var(--celestial-star)), transparent),
+      radial-gradient(1px 1px at 90px 40px, hsl(var(--celestial-star)), transparent),
+      radial-gradient(1px 1px at 130px 80px, hsl(var(--celestial-star)), transparent),
+      radial-gradient(2px 2px at 160px 30px, hsl(var(--celestial-star)), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: constellation 20s linear infinite;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .drift-card {
+    background: linear-gradient(145deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--celestial-cosmos)) 100%);
+    border: 1px solid hsl(var(--celestial-aurora) / 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .drift-card:hover {
+    border-color: hsl(var(--celestial-aurora));
+    box-shadow: 0 0 15px hsl(var(--celestial-aurora) / 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* Custom scrollbar for celestial theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--celestial-void));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+      hsl(var(--celestial-aurora)),
+      hsl(var(--celestial-plasma)));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg,
+      hsl(var(--celestial-plasma)),
+      hsl(var(--celestial-quantum)));
+  }
+}
