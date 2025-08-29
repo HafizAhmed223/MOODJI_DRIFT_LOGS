@@ -51,7 +51,11 @@ import {
   getEmptyStateMessage,
 } from "@/lib/chart-utils";
 
-export default function UserProfile({ params }: { params: Promise<{ id: string }> }) {
+export default function UserProfile({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = React.use(params as Promise<{ id: string }>);
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
@@ -66,10 +70,14 @@ export default function UserProfile({ params }: { params: Promise<{ id: string }
       try {
         let response: Response;
         try {
-          response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+          response = await fetch(`/api/users/${id}/drift-logs`, {
+            cache: "no-store",
+          });
         } catch (e) {
           await new Promise((r) => setTimeout(r, 500));
-          response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+          response = await fetch(`/api/users/${id}/drift-logs`, {
+            cache: "no-store",
+          });
         }
         if (response.status === 404) {
           setUserEntries([]);
@@ -132,7 +140,9 @@ export default function UserProfile({ params }: { params: Promise<{ id: string }
             <span className="text-destructive">!</span>
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">Unable to load user</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              Unable to load user
+            </h2>
             <p className="text-muted-foreground">{error}</p>
           </div>
           <Button onClick={() => router.push("/")} className="mt-6">

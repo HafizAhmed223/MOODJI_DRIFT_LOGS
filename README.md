@@ -3,6 +3,7 @@
 This project extends the existing Moodji Dashboard by adding a backend using Next.js API Routes with MongoDB (Mongoose). The frontend UI/UX remains unchanged and now fetches live data from the backend APIs.
 
 ## Tech Stack
+
 - Next.js (App Router) for frontend and API routes
 - MongoDB with Mongoose
 - TailwindCSS and shadcn/ui components
@@ -73,6 +74,7 @@ Each document in the collection matches this structure:
 ```
 
 ## Notes
+
 - The collection name defaults to `resonance_drift_log`. Override via `MONGODB_COLLECTION` if different.
 - The database name defaults to `test`. Override via `MONGODB_DBNAME` if needed.
 - Environment variables are required for the backend endpoints to work.

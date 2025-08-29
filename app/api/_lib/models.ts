@@ -7,7 +7,7 @@ const FieldSchema = new Schema(
     name: { type: String, required: true },
     hz: { type: Number, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const EquationSchema = new Schema(
@@ -15,7 +15,7 @@ const EquationSchema = new Schema(
     formula: { type: String, required: true },
     description: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const CreationSchema = new Schema(
@@ -28,7 +28,7 @@ const CreationSchema = new Schema(
     bloom_petal: { type: String, required: true },
     equation: { type: EquationSchema, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const LawPortionSchema = new Schema(
@@ -37,7 +37,7 @@ const LawPortionSchema = new Schema(
     rules_applied: { type: [String], required: true },
     contract_scan: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const BloomRenderSchema = new Schema(
@@ -45,21 +45,21 @@ const BloomRenderSchema = new Schema(
     petal: { type: String, required: true },
     animation: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const CelestiumMappingSchema = new Schema(
   {
     constellation: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const MirrorDnaSchema = new Schema(
   {
     dna_string: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const DriftLogSchema = new Schema(
@@ -77,7 +77,9 @@ const DriftLogSchema = new Schema(
   {
     versionKey: false,
     collection: getCollectionName(),
-  }
+  },
 );
 
-export const DriftLog = (models.DriftLog as ReturnType<typeof model>) || model("DriftLog", DriftLogSchema, getCollectionName());
+export const DriftLog =
+  (models.DriftLog as ReturnType<typeof model>) ||
+  model("DriftLog", DriftLogSchema, getCollectionName());

@@ -90,10 +90,14 @@ export default function Dashboard() {
       try {
         let response: Response;
         try {
-          response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+          response = await fetch(`/api/users?page=1&limit=100`, {
+            cache: "no-store",
+          });
         } catch (e) {
           await new Promise((r) => setTimeout(r, 500));
-          response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+          response = await fetch(`/api/users?page=1&limit=100`, {
+            cache: "no-store",
+          });
         }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -113,7 +117,11 @@ export default function Dashboard() {
               bloom_petal: "",
               equation: { formula: "", description: "" },
             },
-            law_portion: { status: u.status, rules_applied: [], contract_scan: "" },
+            law_portion: {
+              status: u.status,
+              rules_applied: [],
+              contract_scan: "",
+            },
             bloom_render: { petal: "", animation: "" },
             celestium_mapping: { constellation: u.constellation },
             mirror_dna: { dna_string: "" },
@@ -240,7 +248,8 @@ export default function Dashboard() {
                   <CardHeader className="relative z-10 space-y-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg font-semibold text-foreground group-hover:text-celestial-aurora transition-colors">
-                        {(user.user_id ?? "").replace("user_", "User ") || "User"}
+                        {(user.user_id ?? "").replace("user_", "User ") ||
+                          "User"}
                       </CardTitle>
                       {getStatusIcon(user.status)}
                     </div>

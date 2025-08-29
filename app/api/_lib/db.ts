@@ -6,7 +6,9 @@ const MONGODB_DBNAME = process.env.MONGODB_DBNAME || "test";
 if (!MONGODB_URI) {
   // We throw a descriptive error only when a connection is attempted
   // so the app can still build without env configured.
-  console.warn("MONGODB_URI is not set. API routes depending on MongoDB will fail until it's provided.");
+  console.warn(
+    "MONGODB_URI is not set. API routes depending on MongoDB will fail until it's provided.",
+  );
 }
 
 interface MongooseCache {
@@ -30,12 +32,14 @@ export async function connectToDatabase() {
     if (!MONGODB_URI) {
       throw new Error("MONGODB_URI is not defined in environment variables");
     }
-    cached!.promise = mongoose.connect(MONGODB_URI, {
-      dbName: MONGODB_DBNAME,
-      // Avoid strictQuery deprecation warnings
-      // @ts-expect-error: Mongoose connection options are loosely typed across versions
-      serverSelectionTimeoutMS: 10000,
-    }).then((m) => m);
+    cached!.promise = mongoose
+      .connect(MONGODB_URI, {
+        dbName: MONGODB_DBNAME,
+        // Avoid strictQuery deprecation warnings
+        // @ts-expect-error: Mongoose connection options are loosely typed across versions
+        serverSelectionTimeoutMS: 10000,
+      })
+      .then((m) => m);
   }
   cached!.conn = await cached!.promise;
   return cached!.conn;
