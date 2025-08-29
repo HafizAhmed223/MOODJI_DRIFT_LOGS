@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "../../../_lib/db";
-import { DriftLog } from "../../../_lib/models";
+import { connectToDatabase, getResolvedCollection } from "../../../_lib/db";
 
 export async function GET(
   _req: NextRequest,
@@ -14,10 +13,17 @@ export async function GET(
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    const logs = await DriftLog.find({ $or: [{ userId }, { user_id: userId }] })
+    const col = await getResolvedCollection();
+
+    const logs = await col
+      .find({ $or: [{ userId }, { user_id: userId }] })
       .sort({ created_at: 1 })
-      .lean();
+      .toArray();
+
     if (!logs || logs.length === 0) {
+      console.warn(
+        `[drift-logs] No logs for userId="${userId}" in collection "${col.collectionName}"`,
+      );
       return NextResponse.json(
         { error: "User not found or no drift logs" },
         { status: 404 },
