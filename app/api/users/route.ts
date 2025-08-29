@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
-import { connectToDatabase } from "../_lib/db";
-import { DriftLog } from "../_lib/models";
+import { connectToDatabase, getResolvedCollection } from "../_lib/db";
 
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+
+    const col = await getResolvedCollection();
 
     const { searchParams } = new URL(req.url);
     const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
@@ -14,8 +15,14 @@ export async function GET(req: NextRequest) {
     );
     const skip = (page - 1) * limit;
 
-    // Aggregate distinct users with latest entry and stats
-    const results = await DriftLog.aggregate([
+    const docCount = await col.estimatedDocumentCount().catch(() => 0);
+    if (docCount === 0) {
+      console.warn(
+        `[users] Warning: No documents found in collection "${col.collectionName}". Check DB/collection names and permissions.`,
+      );
+    }
+
+    const cursor = col.aggregate([
       { $addFields: { userKey: { $ifNull: ["$userId", "$user_id"] } } },
       { $match: { userKey: { $type: "string", $ne: "" } } },
       { $sort: { created_at: -1 } },
@@ -57,10 +64,18 @@ export async function GET(req: NextRequest) {
           totalCount: [{ $count: "count" }],
         },
       },
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
-    const users = results?.[0]?.results || [];
-    const total = results?.[0]?.totalCount?.[0]?.count || 0;
+    const agg = await cursor.toArray();
+    const users = agg?.[0]?.results || [];
+    const total = agg?.[0]?.totalCount?.[0]?.count || 0;
+
+    if (total === 0) {
+      console.warn(
+        `[users] Aggregation returned 0 users on collection "${col.collectionName}" (docs: ${docCount}).`,
+      );
+    }
+
     return Response.json({
       users,
       page,
