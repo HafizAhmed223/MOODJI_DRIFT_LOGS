@@ -88,7 +88,13 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        let response: Response;
+        try {
+          response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        } catch (e) {
+          await new Promise((r) => setTimeout(r, 500));
+          response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const summaries: UserSummary[] = (data.users || []).map((u: any) => ({
