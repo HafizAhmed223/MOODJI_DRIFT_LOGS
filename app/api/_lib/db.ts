@@ -35,8 +35,6 @@ export async function connectToDatabase() {
     cached!.promise = mongoose
       .connect(MONGODB_URI, {
         dbName: MONGODB_DBNAME,
-        // Avoid strictQuery deprecation warnings
-        // @ts-expect-error: Mongoose connection options are loosely typed across versions
         serverSelectionTimeoutMS: 10000,
       })
       .then((m) => m);
