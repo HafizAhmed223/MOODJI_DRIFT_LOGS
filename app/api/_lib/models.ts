@@ -1,4 +1,4 @@
-import { Schema, models, model } from "mongoose";
+import { Schema, models, model, type Model } from "mongoose";
 import { getCollectionName } from "./db";
 
 // Drift Log Schema (strictly matching requested structure)
