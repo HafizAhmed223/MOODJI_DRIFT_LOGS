@@ -13,16 +13,15 @@ export async function GET(req: NextRequest) {
 
     // Aggregate distinct users with latest entry and stats
     const results = await DriftLog.aggregate([
-      { $match: { userId: { $type: "string", $ne: "" } } },
+      { $addFields: { userKey: { $ifNull: ["$userId", "$user_id"] } } },
+      { $match: { userKey: { $type: "string", $ne: "" } } },
       { $sort: { created_at: -1 } },
       {
         $group: {
-          _id: "$userId",
+          _id: "$userKey",
           latest: { $first: "$$ROOT" },
           totalEntries: { $sum: 1 },
-          completedEntries: {
-            $sum: { $cond: ["$final_payload", 1, 0] },
-          },
+          completedEntries: { $sum: { $cond: ["$final_payload", 1, 0] } },
         },
       },
       {
