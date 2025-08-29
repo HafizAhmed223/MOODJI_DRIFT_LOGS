@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase, getResolvedCollection } from "../_lib/db";
 
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
