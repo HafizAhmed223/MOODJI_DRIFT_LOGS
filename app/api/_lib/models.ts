@@ -80,6 +80,6 @@ const DriftLogSchema = new Schema(
   },
 );
 
-export const DriftLog =
-  (models.DriftLog as ReturnType<typeof model>) ||
-  model("DriftLog", DriftLogSchema, getCollectionName());
+export const DriftLog: Model<any> =
+  (models.DriftLog as Model<any>) ||
+  model<any>("DriftLog", DriftLogSchema, getCollectionName());
