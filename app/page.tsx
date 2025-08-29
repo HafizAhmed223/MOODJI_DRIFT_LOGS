@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, Users, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { processUserSummaries } from "@/lib/drift-data";
 
 interface DriftLogEntry {
   id: string;
@@ -99,40 +100,50 @@ export default function Dashboard() {
             cache: "no-store",
           });
         }
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const summaries: UserSummary[] = (data.users || []).map((u: any) => ({
-          user_id: u.userId,
-          latest_entry: {
-            id: "",
+        let summaries: UserSummary[] = [];
+        if (response.ok) {
+          const data = await response.json();
+          summaries = (data.users || []).map((u: any) => ({
             user_id: u.userId,
-            created_at: u.last_activity,
-            final_payload: false,
-            creation: {
-              input_desire: "",
-              mood_label: u.latest_mood,
-              conflict_intensity: 0,
-              field: { name: "", hz: 0 },
-              bloom_phase: 0,
-              bloom_petal: "",
-              equation: { formula: "", description: "" },
+            latest_entry: {
+              id: "",
+              user_id: u.userId,
+              created_at: u.last_activity,
+              final_payload: false,
+              creation: {
+                input_desire: "",
+                mood_label: u.latest_mood,
+                conflict_intensity: 0,
+                field: { name: "", hz: 0 },
+                bloom_phase: 0,
+                bloom_petal: "",
+                equation: { formula: "", description: "" },
+              },
+              law_portion: {
+                status: u.status,
+                rules_applied: [],
+                contract_scan: "",
+              },
+              bloom_render: { petal: "", animation: "" },
+              celestium_mapping: { constellation: u.constellation },
+              mirror_dna: { dna_string: "" },
             },
-            law_portion: {
-              status: u.status,
-              rules_applied: [],
-              contract_scan: "",
-            },
-            bloom_render: { petal: "", animation: "" },
-            celestium_mapping: { constellation: u.constellation },
-            mirror_dna: { dna_string: "" },
-          },
-          total_entries: u.total_entries || 0,
-          journey_completion: u.journey_completion || 0,
-          latest_mood: u.latest_mood,
-          last_activity: u.last_activity,
-          constellation: u.constellation,
-          status: u.status,
-        }));
+            total_entries: u.total_entries || 0,
+            journey_completion: u.journey_completion || 0,
+            latest_mood: u.latest_mood,
+            last_activity: u.last_activity,
+            constellation: u.constellation,
+            status: u.status,
+          }));
+        }
+        if (!response.ok || summaries.length === 0) {
+          const fallbackRes = await fetch("/mock_data.json", { cache: "no-store" });
+          if (fallbackRes.ok) {
+            const data = await fallbackRes.json();
+            const logs = data?.resonance_drift_log || [];
+            summaries = processUserSummaries(logs as any) as unknown as UserSummary[];
+          }
+        }
         setUserSummaries(summaries);
         setError(null);
       } catch (e: any) {
