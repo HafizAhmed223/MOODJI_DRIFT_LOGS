@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
 
     // Aggregate distinct users with latest entry and stats
     const results = await DriftLog.aggregate([
+      { $match: { userId: { $type: "string", $ne: "" } } },
       { $sort: { created_at: -1 } },
       {
         $group: {
