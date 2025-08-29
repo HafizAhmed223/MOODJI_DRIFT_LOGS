@@ -82,48 +82,21 @@ export default function Dashboard() {
   const [userSummaries, setUserSummaries] = useState<UserSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log || [];
-        const userMap: { [key: string]: DriftLogEntry[] } = {};
-        logs.forEach((log) => {
-          if (!userMap[log.user_id]) userMap[log.user_id] = [];
-          userMap[log.user_id].push(log);
-        });
-        const summaries: UserSummary[] = Object.entries(userMap).map(
-          ([userId, entries]) => {
-            const sortedEntries = entries.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            );
-            const latestEntry = sortedEntries[0];
-            const completedEntries = entries.filter(
-              (e) => e.final_payload,
-            ).length;
-            const journeyCompletion = (completedEntries / entries.length) * 100;
-            return {
-              user_id: userId,
-              latest_entry: latestEntry,
-              total_entries: entries.length,
-              journey_completion: journeyCompletion,
-              latest_mood: latestEntry.creation.mood_label,
-              last_activity: latestEntry.created_at,
-              constellation: latestEntry.celestium_mapping.constellation,
-              status: latestEntry.law_portion.status,
-            };
-          },
-        );
-        setUserSummaries(summaries);
-      } catch (e) {
-        console.error("Error loading drift log data:", e);
+        const response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
+        const summaries: UserSummary[] = json.users ?? json;
+        setUserSummaries(Array.isArray(summaries) ? summaries : []);
+        setError(null);
+      } catch (e: any) {
+        console.error("Error loading users:", e);
+        setError(e?.message || "Failed to load users");
       } finally {
         setLoading(false);
       }
@@ -197,10 +170,12 @@ export default function Dashboard() {
                 <Users className="h-16 w-16 text-muted-foreground mx-auto" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                No users found
+                {error ? "Failed to load users" : "No users found"}
               </h3>
               <p className="text-muted-foreground">
-                {searchTerm
+                {error
+                  ? error
+                  : searchTerm
                   ? "Try adjusting your search terms."
                   : "No drift log entries available."}
               </p>
