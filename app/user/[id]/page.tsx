@@ -51,8 +51,8 @@ import {
   getEmptyStateMessage,
 } from "@/lib/chart-utils";
 
-export default function UserProfile({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default function UserProfile({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params as Promise<{ id: string }>);
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
