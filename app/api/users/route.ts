@@ -24,49 +24,52 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cursor = col.aggregate([
-      { $addFields: { userKey: { $ifNull: ["$userId", "$user_id"] } } },
-      { $match: { userKey: { $type: "string", $ne: "" } } },
-      { $sort: { created_at: -1 } },
-      {
-        $group: {
-          _id: "$userKey",
-          latest: { $first: "$$ROOT" },
-          totalEntries: { $sum: 1 },
-          completedEntries: { $sum: { $cond: ["$final_payload", 1, 0] } },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          userId: "$_id",
-          latest_mood: "$latest.creation.mood_label",
-          constellation: "$latest.celestium_mapping.constellation",
-          last_activity: "$latest.created_at",
-          status: "$latest.law_portion.status",
-          total_entries: "$totalEntries",
-          journey_completion: {
-            $cond: [
-              { $gt: ["$totalEntries", 0] },
-              {
-                $multiply: [
-                  { $divide: ["$completedEntries", "$totalEntries"] },
-                  100,
-                ],
-              },
-              0,
-            ],
+    const cursor = col.aggregate(
+      [
+        { $addFields: { userKey: { $ifNull: ["$userId", "$user_id"] } } },
+        { $match: { userKey: { $type: "string", $ne: "" } } },
+        { $sort: { created_at: -1 } },
+        {
+          $group: {
+            _id: "$userKey",
+            latest: { $first: "$$ROOT" },
+            totalEntries: { $sum: 1 },
+            completedEntries: { $sum: { $cond: ["$final_payload", 1, 0] } },
           },
         },
-      },
-      { $sort: { userId: 1 } },
-      {
-        $facet: {
-          results: [{ $skip: skip }, { $limit: limit }],
-          totalCount: [{ $count: "count" }],
+        {
+          $project: {
+            _id: 0,
+            userId: "$_id",
+            latest_mood: "$latest.creation.mood_label",
+            constellation: "$latest.celestium_mapping.constellation",
+            last_activity: "$latest.created_at",
+            status: "$latest.law_portion.status",
+            total_entries: "$totalEntries",
+            journey_completion: {
+              $cond: [
+                { $gt: ["$totalEntries", 0] },
+                {
+                  $multiply: [
+                    { $divide: ["$completedEntries", "$totalEntries"] },
+                    100,
+                  ],
+                },
+                0,
+              ],
+            },
+          },
         },
-      },
-    ], { allowDiskUse: true });
+        { $sort: { userId: 1 } },
+        {
+          $facet: {
+            results: [{ $skip: skip }, { $limit: limit }],
+            totalCount: [{ $count: "count" }],
+          },
+        },
+      ],
+      { allowDiskUse: true },
+    );
 
     const agg = await cursor.toArray();
     const users = agg?.[0]?.results || [];

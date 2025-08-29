@@ -62,7 +62,9 @@ export async function getResolvedCollection() {
 
   try {
     const all = await db.listCollections().toArray();
-    const match = all.find((c) => /resonan.*drift.*log/i.test(c.name) || /drift.*log/i.test(c.name));
+    const match = all.find(
+      (c) => /resonan.*drift.*log/i.test(c.name) || /drift.*log/i.test(c.name),
+    );
     if (match) {
       console.warn(
         `Using fallback collection resolved from pattern: ${match.name} (preferred was ${preferred})`,
