@@ -68,7 +68,9 @@ export default function UserProfile({
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        const response = await fetch(`/api/users/${id}/drift-logs`, {
+          cache: "no-store",
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const entries: DriftLogEntry[] = data.entries ?? [];

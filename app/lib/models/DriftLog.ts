@@ -71,4 +71,5 @@ const DriftLogSchema = new Schema<DriftLogDoc>(
   { timestamps: false, versionKey: false, collection: "resonance_drift_log" },
 );
 
-export const DriftLogModel = models.DriftLog || model<DriftLogDoc>("DriftLog", DriftLogSchema);
+export const DriftLogModel =
+  models.DriftLog || model<DriftLogDoc>("DriftLog", DriftLogSchema);

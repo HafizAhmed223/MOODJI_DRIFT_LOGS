@@ -19,7 +19,12 @@ export async function GET(req: NextRequest) {
 
     if (Number.isNaN(pageRaw) || Number.isNaN(limitRaw)) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "'page' and 'limit' must be positive integers" } },
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "'page' and 'limit' must be positive integers",
+          },
+        },
         { status: 400 },
       );
     }
@@ -58,7 +63,9 @@ export async function GET(req: NextRequest) {
             $cond: [
               { $eq: ["$total_entries", 0] },
               0,
-              { $multiply: [{ $divide: ["$completed", "$total_entries"] }, 100] },
+              {
+                $multiply: [{ $divide: ["$completed", "$total_entries"] }, 100],
+              },
             ],
           },
           latest_mood: "$latest.creation.mood_label",

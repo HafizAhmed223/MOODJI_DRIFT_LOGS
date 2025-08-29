@@ -35,7 +35,9 @@ export async function GET(
     return NextResponse.json({ entries });
   } catch (err: any) {
     return NextResponse.json(
-      { error: { code: "INTERNAL_ERROR", message: "Failed to load drift logs" } },
+      {
+        error: { code: "INTERNAL_ERROR", message: "Failed to load drift logs" },
+      },
       { status: 500 },
     );
   }

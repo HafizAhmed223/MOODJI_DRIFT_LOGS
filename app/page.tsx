@@ -88,7 +88,9 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        const response = await fetch(`/api/users?page=1&limit=100`, {
+          cache: "no-store",
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const json = await response.json();
         const summaries: UserSummary[] = json.users ?? json;
@@ -176,8 +178,8 @@ export default function Dashboard() {
                 {error
                   ? error
                   : searchTerm
-                  ? "Try adjusting your search terms."
-                  : "No drift log entries available."}
+                    ? "Try adjusting your search terms."
+                    : "No drift log entries available."}
               </p>
             </div>
           ) : (
