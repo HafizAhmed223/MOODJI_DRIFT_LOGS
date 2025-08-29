@@ -50,6 +50,8 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "client/App.tsx",
+    "client/pages/**/*"
   ]
 }
