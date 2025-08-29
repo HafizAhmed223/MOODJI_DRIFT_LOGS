@@ -82,48 +82,48 @@ export default function Dashboard() {
   const [userSummaries, setUserSummaries] = useState<UserSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch(`/api/users?page=1&limit=100`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log || [];
-        const userMap: { [key: string]: DriftLogEntry[] } = {};
-        logs.forEach((log) => {
-          if (!userMap[log.user_id]) userMap[log.user_id] = [];
-          userMap[log.user_id].push(log);
-        });
-        const summaries: UserSummary[] = Object.entries(userMap).map(
-          ([userId, entries]) => {
-            const sortedEntries = entries.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            );
-            const latestEntry = sortedEntries[0];
-            const completedEntries = entries.filter(
-              (e) => e.final_payload,
-            ).length;
-            const journeyCompletion = (completedEntries / entries.length) * 100;
-            return {
-              user_id: userId,
-              latest_entry: latestEntry,
-              total_entries: entries.length,
-              journey_completion: journeyCompletion,
-              latest_mood: latestEntry.creation.mood_label,
-              last_activity: latestEntry.created_at,
-              constellation: latestEntry.celestium_mapping.constellation,
-              status: latestEntry.law_portion.status,
-            };
+        const summaries: UserSummary[] = (data.users || []).map((u: any) => ({
+          user_id: u.userId,
+          latest_entry: {
+            id: "",
+            user_id: u.userId,
+            created_at: u.last_activity,
+            final_payload: false,
+            creation: {
+              input_desire: "",
+              mood_label: u.latest_mood,
+              conflict_intensity: 0,
+              field: { name: "", hz: 0 },
+              bloom_phase: 0,
+              bloom_petal: "",
+              equation: { formula: "", description: "" },
+            },
+            law_portion: { status: u.status, rules_applied: [], contract_scan: "" },
+            bloom_render: { petal: "", animation: "" },
+            celestium_mapping: { constellation: u.constellation },
+            mirror_dna: { dna_string: "" },
           },
-        );
+          total_entries: u.total_entries || 0,
+          journey_completion: u.journey_completion || 0,
+          latest_mood: u.latest_mood,
+          last_activity: u.last_activity,
+          constellation: u.constellation,
+          status: u.status,
+        }));
         setUserSummaries(summaries);
-      } catch (e) {
+        setError(null);
+      } catch (e: any) {
         console.error("Error loading drift log data:", e);
+        setError(e?.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -152,6 +152,17 @@ export default function Dashboard() {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-celestial-aurora border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-foreground/70">Loading Resonance Drift Logs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen celestial-gradient flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-destructive border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-destructive-foreground/90">{error}</p>
         </div>
       </div>
     );
