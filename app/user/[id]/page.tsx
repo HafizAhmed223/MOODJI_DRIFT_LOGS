@@ -50,6 +50,7 @@ import {
   processFrequencyData,
   getEmptyStateMessage,
 } from "@/lib/chart-utils";
+import { loadDriftLogData, getUserEntries } from "@/lib/drift-data";
 
 export default function UserProfile({
   params,
@@ -79,25 +80,25 @@ export default function UserProfile({
             cache: "no-store",
           });
         }
-        if (response.status === 404) {
-          setUserEntries([]);
-          setSelectedEntry(null);
-          setError("User not found or no drift logs");
-          return;
+        let entries: DriftLogEntry[] = [];
+        if (response.ok) {
+          const data = await response.json();
+          entries = (data.logs || []).map((log: any) => ({
+            id: log.id,
+            user_id: log.userId ?? log.user_id,
+            created_at: log.created_at,
+            final_payload: log.final_payload,
+            creation: log.creation,
+            law_portion: log.law_portion,
+            bloom_render: log.bloom_render,
+            celestium_mapping: log.celestium_mapping,
+            mirror_dna: log.mirror_dna,
+          }));
         }
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const entries: DriftLogEntry[] = (data.logs || []).map((log: any) => ({
-          id: log.id,
-          user_id: log.userId,
-          created_at: log.created_at,
-          final_payload: log.final_payload,
-          creation: log.creation,
-          law_portion: log.law_portion,
-          bloom_render: log.bloom_render,
-          celestium_mapping: log.celestium_mapping,
-          mirror_dna: log.mirror_dna,
-        }));
+        if (!response.ok || entries.length === 0) {
+          const allLogs = await loadDriftLogData();
+          entries = getUserEntries(allLogs, id);
+        }
         setUserEntries(entries);
         if (entries.length > 0) setSelectedEntry(entries[entries.length - 1]);
         setError(null);
