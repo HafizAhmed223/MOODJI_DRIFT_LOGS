@@ -56,6 +56,7 @@ export default function UserProfile({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<DriftLogEntry | null>(
     null,
   );
@@ -63,20 +64,32 @@ export default function UserProfile({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
+        const response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        if (response.status === 404) {
+          setUserEntries([]);
+          setSelectedEntry(null);
+          setError("User not found or no drift logs");
+          return;
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log;
-        const entries = logs
-          .filter((log: DriftLogEntry) => log.user_id === id)
-          .sort(
-            (a: DriftLogEntry, b: DriftLogEntry) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
+        const entries: DriftLogEntry[] = (data.logs || []).map((log: any) => ({
+          id: log.id,
+          user_id: log.userId,
+          created_at: log.created_at,
+          final_payload: log.final_payload,
+          creation: log.creation,
+          law_portion: log.law_portion,
+          bloom_render: log.bloom_render,
+          celestium_mapping: log.celestium_mapping,
+          mirror_dna: log.mirror_dna,
+        }));
         setUserEntries(entries);
         if (entries.length > 0) setSelectedEntry(entries[entries.length - 1]);
-      } catch (error) {
+        setError(null);
+      } catch (error: any) {
         console.error("Error loading user data:", error);
+        setError(error?.message || "Failed to load user data");
       } finally {
         setLoading(false);
       }
@@ -100,6 +113,26 @@ export default function UserProfile({ params }: { params: { id: string } }) {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-celestial-aurora border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-foreground/70">Loading User Starmap...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen celestial-gradient flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-20 h-20 rounded-full bg-destructive/20 flex items-center justify-center mx-auto">
+            <span className="text-destructive">!</span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Unable to load user</h2>
+            <p className="text-muted-foreground">{error}</p>
+          </div>
+          <Button onClick={() => router.push("/")} className="mt-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Return to Dashboard
+          </Button>
         </div>
       </div>
     );
