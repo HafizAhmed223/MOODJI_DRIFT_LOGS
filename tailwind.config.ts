@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./app/**/*.{ts,tsx}", "./client/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./client/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -100,20 +105,23 @@ export default {
             height: "0",
           },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-20px)" },
         },
         "pulse-glow": {
           "0%": { "box-shadow": "0 0 5px hsl(var(--celestial-aurora))" },
-          "100%": { "box-shadow": "0 0 20px hsl(var(--celestial-aurora)), 0 0 30px hsl(var(--celestial-aurora))" },
+          "100%": {
+            "box-shadow":
+              "0 0 20px hsl(var(--celestial-aurora)), 0 0 30px hsl(var(--celestial-aurora))",
+          },
         },
-        "drift": {
+        drift: {
           "0%, 100%": { transform: "translateX(0px) rotateY(0deg)" },
           "33%": { transform: "translateX(10px) rotateY(5deg)" },
           "66%": { transform: "translateX(-10px) rotateY(-5deg)" },
         },
-        "constellation": {
+        constellation: {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },
         },
@@ -121,10 +129,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite alternate",
-        "drift": "drift 8s ease-in-out infinite",
-        "constellation": "constellation 12s linear infinite",
+        drift: "drift 8s ease-in-out infinite",
+        constellation: "constellation 12s linear infinite",
       },
     },
   },
