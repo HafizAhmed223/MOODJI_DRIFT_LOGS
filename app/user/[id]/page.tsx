@@ -60,6 +60,7 @@ export default function UserProfile({
   const router = useRouter();
   const [userEntries, setUserEntries] = useState<DriftLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<DriftLogEntry | null>(
     null,
   );
@@ -67,20 +68,16 @@ export default function UserProfile({
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch("/mock_data.json");
+        const response = await fetch(`/api/users/${id}/drift-logs`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        const logs: DriftLogEntry[] = data.resonance_drift_log;
-        const entries = logs
-          .filter((log: DriftLogEntry) => log.user_id === id)
-          .sort(
-            (a: DriftLogEntry, b: DriftLogEntry) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
+        const entries: DriftLogEntry[] = data.entries ?? [];
         setUserEntries(entries);
         if (entries.length > 0) setSelectedEntry(entries[entries.length - 1]);
-      } catch (error) {
+        setError(null);
+      } catch (error: any) {
         console.error("Error loading user data:", error);
+        setError(error?.message || "Failed to load user data");
       } finally {
         setLoading(false);
       }
@@ -118,11 +115,12 @@ export default function UserProfile({
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">
-              User Journey Not Found
+              {error ? "Failed to load user data" : "User Journey Not Found"}
             </h2>
             <p className="text-muted-foreground">
-              No drift log entries found for this user. Their cosmic journey may
-              not have begun yet.
+              {error
+                ? error
+                : "No drift log entries found for this user. Their cosmic journey may not have begun yet."}
             </p>
           </div>
           <Button onClick={() => router.push("/")} className="mt-6">
