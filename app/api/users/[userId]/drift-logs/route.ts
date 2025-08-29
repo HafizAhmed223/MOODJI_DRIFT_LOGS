@@ -11,6 +11,14 @@ export async function GET(
 ) {
   try {
     const { userId } = params;
+
+    if (!userId || typeof userId !== "string") {
+      return NextResponse.json(
+        { error: { code: "BAD_REQUEST", message: "'userId' is required" } },
+        { status: 400 },
+      );
+    }
+
     await connectToDatabase();
 
     const docs = await DriftLogModel.find({ userId })
@@ -27,7 +35,7 @@ export async function GET(
     return NextResponse.json({ entries });
   } catch (err: any) {
     return NextResponse.json(
-      { error: "Failed to load drift logs", details: err?.message || String(err) },
+      { error: { code: "INTERNAL_ERROR", message: "Failed to load drift logs" } },
       { status: 500 },
     );
   }

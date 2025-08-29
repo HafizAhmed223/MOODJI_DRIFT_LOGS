@@ -5,24 +5,35 @@ import { DriftLogModel } from "../../lib/models/DriftLog";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function parseIntOrDefault(value: string | null, def: number) {
-  const n = Number.parseInt(value || "", 10);
-  return Number.isFinite(n) && n > 0 ? n : def;
+function parsePositiveInt(value: string | null) {
+  if (value == null) return null;
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : NaN;
 }
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
-
     const { searchParams } = new URL(req.url);
-    const page = parseIntOrDefault(searchParams.get("page"), 1);
-    const limit = parseIntOrDefault(searchParams.get("limit"), 20);
+    const pageRaw = parsePositiveInt(searchParams.get("page"));
+    const limitRaw = parsePositiveInt(searchParams.get("limit"));
+
+    if (Number.isNaN(pageRaw) || Number.isNaN(limitRaw)) {
+      return NextResponse.json(
+        { error: { code: "BAD_REQUEST", message: "'page' and 'limit' must be positive integers" } },
+        { status: 400 },
+      );
+    }
+
+    const page = pageRaw ?? 1;
+    const limit = Math.max(1, Math.min(limitRaw ?? 20, 100)); // clamp 1..100
     const skip = (page - 1) * limit;
+
+    await connectToDatabase();
 
     const totalUsersAgg = await DriftLogModel.aggregate([
       { $group: { _id: "$userId" } },
       { $count: "count" },
-    ]);
+    ]).catch(() => [] as any[]);
     const total = totalUsersAgg[0]?.count || 0;
 
     const users = await DriftLogModel.aggregate([
@@ -77,7 +88,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ users: normalized, page, limit, total });
   } catch (err: any) {
     return NextResponse.json(
-      { error: "Failed to load users", details: err?.message || String(err) },
+      { error: { code: "INTERNAL_ERROR", message: "Failed to load users" } },
       { status: 500 },
     );
   }
