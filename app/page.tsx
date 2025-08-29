@@ -231,7 +231,7 @@ export default function Dashboard() {
                   <CardHeader className="relative z-10 space-y-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg font-semibold text-foreground group-hover:text-celestial-aurora transition-colors">
-                        {user.user_id.replace("user_", "User ")}
+                        {(user.user_id ?? "").replace("user_", "User ") || "User"}
                       </CardTitle>
                       {getStatusIcon(user.status)}
                     </div>
