@@ -137,11 +137,15 @@ export default function Dashboard() {
           }));
         }
         if (!response.ok || summaries.length === 0) {
-          const fallbackRes = await fetch("/mock_data.json", { cache: "no-store" });
+          const fallbackRes = await fetch("/mock_data.json", {
+            cache: "no-store",
+          });
           if (fallbackRes.ok) {
             const data = await fallbackRes.json();
             const logs = data?.resonance_drift_log || [];
-            summaries = processUserSummaries(logs as any) as unknown as UserSummary[];
+            summaries = processUserSummaries(
+              logs as any,
+            ) as unknown as UserSummary[];
           }
         }
         setUserSummaries(summaries);
